@@ -17,18 +17,14 @@ app.use('/images', express.static(path.join(__dirname, 'images')))
 app.use(cors());
 
 app.use('/auth', authRoutes)
-app.use('/column', columnRoutes)
-app.use('/task', taskRoutes)
-app.get('/', (req, res) => {
-  res.send('Hello, World!');
-});
+app.use('/api/column', columnRoutes)
+app.use('/api/task', taskRoutes)
 
 async function start() {
   try {
     await mongoose.connect(process.env.MONGO_DB_URI, {
       useNewUrlParser: true,
     })
-    console.log('lol')
     app.listen(3333, () => {
       console.log(`server is running on port ${process.env.PORT || 3333}`)
     })
