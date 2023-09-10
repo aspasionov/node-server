@@ -34,6 +34,7 @@ router.get('/', checkAuth, async (req, res) => {
                 label: 1,
                 order: 1,
                 columnId: 1,
+                background: 1
               },
             }
           ],

@@ -41,6 +41,26 @@ router.post('/', checkAuth, taskValidator, async (req, res) => {
   }
 })
 
+router.get('/:id', checkAuth, async (req, res) => {
+  try {
+    const currentTask = await Task.findById(req.params.id)
+    console.log('req', )
+
+    const currentColumn = await Column.findById(currentTask.columnId)
+
+    if(currentColumn.userId.toString() !== req.userId) return res.status(403).json({
+      message: 'Card is not allowed'
+    })
+
+    res.status(200).json(currentTask._doc)
+  } catch (e) {
+    console.log(e);
+    res.status(404).json({
+      message: 'something went wrong'
+    })
+  }
+})
+
 router.delete('/:id',checkAuth,  async (req, res) => {
   try {
     const doc = await Task.deleteOne({
