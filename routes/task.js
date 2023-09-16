@@ -134,8 +134,9 @@ router.patch('/:id', checkAuth, async (req, res) => {
   }
 })
 
-router.post('/files/:id',checkAuth, fileUploader.single('background'),  async (req, res) => {
+router.post('/files/:id', checkAuth, fileUploader.single('background'),  async (req, res) => {
   try {
+    res.setHeader('Content-Type', 'image/png')
     const task = await Task.findById(req.params.id)
 
     if(!task) {
