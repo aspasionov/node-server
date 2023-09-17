@@ -72,9 +72,14 @@ router.post('/', checkAuth, async (req, res) => {
       title, label, cards: [], userId: req.userId
     })
 
+    const id = doc._id.toString()
+
     await doc.save()
 
-    res.status(201).json(doc._doc)
+    res.status(201).json({
+      ...doc._doc,
+      id
+    })
   } catch(e) {
     console.log(e)
     res.status(400).json({

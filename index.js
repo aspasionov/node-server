@@ -25,8 +25,8 @@ async function start() {
     await mongoose.connect(process.env.MONGO_DB_URI, {
       useNewUrlParser: true,
     })
-    app.listen(3333, () => {
-      console.log(`server is running on port ${process.env.PORT || 3333}`)
+    app.listen(8080, () => {
+      console.log(`server is running on port ${process.env.PORT || 8080}`)
     })
   } catch(err) {
     console.log(err)

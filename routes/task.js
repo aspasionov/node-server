@@ -92,7 +92,7 @@ router.patch('/:id', checkAuth, async (req, res) => {
       _id: req.params.id
     })
 
-    if(prevColumnId) {
+    if(prevColumnId && prevColumnId !== columnId) {
        await Task.updateMany({
         $and: [
           { order: { $gte: updatedCard.order } },
