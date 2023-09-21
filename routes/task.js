@@ -44,7 +44,6 @@ router.post('/', checkAuth, taskValidator, async (req, res) => {
 router.get('/:id', checkAuth, async (req, res) => {
   try {
     const currentTask = await Task.findById(req.params.id)
-    console.log('req', )
 
     const currentColumn = await Column.findById(currentTask.columnId)
 
@@ -92,10 +91,42 @@ router.patch('/:id', checkAuth, async (req, res) => {
       _id: req.params.id
     })
 
-    if(prevColumnId && prevColumnId !== columnId) {
+    if(prevColumnId === columnId) {
+
+
+      console.log(order , updatedCard.order)
+      if(order - updatedCard.order === 1 || -1) {
+        console.log('here', order - updatedCard.order)
+        return res.status(200).json({ message: 'ssssss' })
+      }
+
+        const x = await Task.updateMany(
+          {
+            $and: [
+              { order: order > updatedCard.order ? { $lte: order } : { $gte: order } },
+              { columnId: updatedCard.columnId, }
+            ]
+          },
+          {
+            $inc: {
+              order: order > updatedCard.order ? -1 : +1
+            }
+          }
+        );
+
+      console.log('x', x.matchedCount)
+      Object.assign(updatedCard, {
+        order,
+      })
+
+        await updatedCard.save()
+      return res.status(200).json(updatedCard._doc)
+    }
+
+    if(prevColumnId) {
        await Task.updateMany({
         $and: [
-          { order: { $gte: updatedCard.order } },
+          { order: { $gt: order } },
           { columnId: prevColumnId, }
         ]
       },
@@ -107,7 +138,8 @@ router.patch('/:id', checkAuth, async (req, res) => {
       label,
       order,
       description,
-      columnId})
+      columnId
+    })
 
     if (updatedCard) {
       await Task.updateMany({
