@@ -51,7 +51,10 @@ router.get('/:id', checkAuth, async (req, res) => {
       message: 'Card is not allowed'
     })
 
-    res.status(200).json(currentTask._doc)
+    res.status(200).json({
+      ...currentTask._doc,
+      id: currentTask._id,
+    })
   } catch (e) {
     console.log(e);
     res.status(404).json({
@@ -92,18 +95,11 @@ router.patch('/:id', checkAuth, async (req, res) => {
     })
 
     if(prevColumnId === columnId) {
-
-
-      console.log(order , updatedCard.order)
-      if(order - updatedCard.order === 1 || -1) {
-        console.log('here', order - updatedCard.order)
-        return res.status(200).json({ message: 'ssssss' })
-      }
-
-        const x = await Task.updateMany(
+        await Task.updateMany(
           {
             $and: [
               { order: order > updatedCard.order ? { $lte: order } : { $gte: order } },
+              { order: order > updatedCard.order ? { $gte: updatedCard.order } : { $lte: updatedCard.order } },
               { columnId: updatedCard.columnId, }
             ]
           },
@@ -114,7 +110,6 @@ router.patch('/:id', checkAuth, async (req, res) => {
           }
         );
 
-      console.log('x', x.matchedCount)
       Object.assign(updatedCard, {
         order,
       })
@@ -126,7 +121,7 @@ router.patch('/:id', checkAuth, async (req, res) => {
     if(prevColumnId) {
        await Task.updateMany({
         $and: [
-          { order: { $gt: order } },
+          { order: { $gt: updatedCard.order } },
           { columnId: prevColumnId, }
         ]
       },
