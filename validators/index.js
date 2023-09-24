@@ -16,4 +16,9 @@ const taskValidator = [
   body('columnId').isMongoId(),
 ]
 
-module.exports = { registerValidator, loginValidator, taskValidator }
+const userValidator = [
+  body('name').isLength({min: 3}),
+  body('email').isEmail(),
+]
+
+module.exports = { registerValidator, loginValidator, taskValidator, userValidator }

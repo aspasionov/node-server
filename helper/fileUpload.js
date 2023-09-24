@@ -1,7 +1,8 @@
 const multer = require('multer')
 const storage = multer.diskStorage({
   destination(req, file, cb) {
-    cb(null, 'images')
+    const isAvatar = file.fieldname === 'avatar'
+    cb(null, isAvatar ? 'images/avatars' : 'images')
   },
   filename(req, file, cb) {
     cb(null, new Date().toISOString() + '-' + file.originalname)

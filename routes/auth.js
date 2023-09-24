@@ -18,8 +18,11 @@ router.get('/me', checkAuth, async (req, res) => {
       })
     }
 
-    const {  password, ...userData } = user._doc
-    res.status(200).json(userData)
+    const {  password,  ...userData } = user._doc
+    res.status(200).json({
+      id: userData._id,
+      ...userData
+    })
 
   } catch (err) {
     res.status(500).json({
