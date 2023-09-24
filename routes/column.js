@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 const Column = require('../models/column');
 const Task = require('../models/task');
 const router = Router()
+const fs =  require("fs")
+const removeFile = require("../helper/removeFile");
 
 const mappedCards = (cards) => cards.map(card => ({
   ...card,
@@ -132,6 +134,18 @@ router.delete('/:id', checkAuth, async (req, res) => {
         message: 'sorry I can`t delete a document'
       })
     }
+
+    const deletedTasks = await Task.find({
+      $and: [
+        { columnId: req.params.id },
+        { background: { $exists: true } }
+      ]
+    })
+
+    deletedTasks.forEach(({  background }) => {
+        if(fs.existsSync(background)) removeFile(background)
+    })
+
 
     await Task.deleteMany({
       columnId: req.params.id

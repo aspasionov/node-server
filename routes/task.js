@@ -5,6 +5,8 @@ const Task = require('../models/task')
 const { taskValidator } = require('../validators/index')
 const fileUploader  = require('../helper/fileUpload')
 const Column = require('../models/column');
+const fs = require("fs")
+const removeFile = require("../helper/removeFile");
 
 const router = Router()
 
@@ -65,6 +67,10 @@ router.get('/:id', checkAuth, async (req, res) => {
 
 router.delete('/:id',checkAuth,  async (req, res) => {
   try {
+    const deletedTask = await Task.findById(req.params.id)
+    if(!deletedTask.background) {
+      if(fs.existsSync(deletedTask.background)) removeFile(deletedTask.background)
+    }
     const doc = await Task.deleteOne({
       _id: req.params.id
     })
@@ -88,7 +94,7 @@ router.delete('/:id',checkAuth,  async (req, res) => {
 
 router.patch('/:id', checkAuth, async (req, res) => {
   try {
-    const { title, description, label, columnId, order, prevColumnId } = req.body
+    const { title, description, label, columnId, order, prevColumnId, background } = req.body
 
     const updatedCard = await Task.findOne({
       _id: req.params.id
@@ -128,6 +134,10 @@ router.patch('/:id', checkAuth, async (req, res) => {
         { $inc: { order: -1 } }
       );
     }
+    if(!background) {
+      if(fs.existsSync(updatedCard.background)) removeFile(updatedCard.background)
+      updatedCard.background = ''
+    }
 
     Object.assign(updatedCard, {title,
       label,
@@ -163,7 +173,6 @@ router.patch('/:id', checkAuth, async (req, res) => {
 
 router.post('/files/:id', checkAuth, fileUploader.single('background'),  async (req, res) => {
   try {
-    res.setHeader('Content-Type', 'image/png')
     const task = await Task.findById(req.params.id)
 
     if(!task) {
