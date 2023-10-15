@@ -5,7 +5,12 @@ const columnSchema = new Schema({
     type: String,
     required: true
   },
+  order: Number,
   label: String,
+  draggable: {
+    type: Boolean,
+    default: true
+  },
   userId: {
     type: Schema.Types.ObjectId,
     ref: 'User',

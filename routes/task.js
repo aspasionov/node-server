@@ -104,8 +104,7 @@ router.patch('/:id', checkAuth, async (req, res) => {
         await Task.updateMany(
           {
             $and: [
-              { order: order > updatedCard.order ? { $lte: order } : { $gte: order } },
-              { order: order > updatedCard.order ? { $gte: updatedCard.order } : { $lte: updatedCard.order } },
+              { order: order > updatedCard.order ? { $lte: order, $gt: updatedCard.order } : { $gte: order, $lt: updatedCard.order } },
               { columnId: updatedCard.columnId, }
             ]
           },

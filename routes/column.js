@@ -17,6 +17,9 @@ router.get('/', checkAuth, async (req, res) => {
     const columns = await Column.aggregate([
       { $match: { userId: new mongoose.Types.ObjectId(req.userId) } },
       {
+        $sort: { order: 1 }
+      },
+      {
         $lookup: {
           from: 'tasks',
           let: { columnId: '$_id' },
@@ -68,9 +71,10 @@ router.get('/', checkAuth, async (req, res) => {
 
 router.post('/', checkAuth, async (req, res) => {
   try {
-    const {title, label} = req.body
+    const {title, label, order} = req.body
 
     const doc = await new Column({
+      order,
       title, label, cards: [], userId: req.userId
     })
 
@@ -92,23 +96,40 @@ router.post('/', checkAuth, async (req, res) => {
 
 router.patch('/:id', checkAuth, async (req, res) => {
   try {
-    const {title, label} = req.body
+    const {title, label, order} = req.body
 
-    const doc = await Column.findOneAndUpdate({
-      _id: req.params.id
-    }, {
-      title,
-      label
-    },
-    {
-      returnDocument: 'after'
-    })
+    const doc = await Column.findById(req.params.id)
 
     if(!doc) {
       res.status(404).json({
-        message: 'sorry I can`t find a document'
+        message: 'sorry I can`t find the document'
       })
     }
+
+    if(doc.order !== order && order) {
+      await Column.updateMany(
+        {
+          $and: [
+            { order: doc.order < order  ? { $lte: order, $gt: doc.order } : { $gte: order, $lt: doc.order } },
+            { userId: req.userId, }
+          ]
+        },
+        {
+          $inc: {
+            order: order > doc.order ? -1 : +1
+          }
+        }
+      );
+      Object.assign(doc, {
+        order,
+      })
+    }
+
+    Object.assign(doc, {
+      order: doc.order,
+      title,
+      label
+    })
 
     await doc.save()
 
@@ -124,7 +145,7 @@ router.patch('/:id', checkAuth, async (req, res) => {
 
 router.delete('/:id', checkAuth, async (req, res) => {
   try {
-    const doc = await Column.deleteOne({
+    const doc = await Column.findOneAndDelete({
         _id: req.params.id
       })
 
@@ -134,6 +155,20 @@ router.delete('/:id', checkAuth, async (req, res) => {
         message: 'sorry I can`t delete a document'
       })
     }
+
+    await Column.updateMany(
+      {
+        $and: [
+          { order:  { $gt: doc.order }},
+          { userId: req.userId, }
+        ]
+      },
+      {
+        $inc: {
+          order: -1
+        }
+      }
+    );
 
     const deletedTasks = await Task.find({
       $and: [
