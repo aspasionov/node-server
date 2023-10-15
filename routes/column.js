@@ -106,7 +106,7 @@ router.patch('/:id', checkAuth, async (req, res) => {
       })
     }
 
-    if(doc.order !== order && order) {
+    if(doc.order !== order && typeof order === 'number') {
       await Column.updateMany(
         {
           $and: [
