@@ -4,6 +4,7 @@ const authRoutes = require('./routes/auth')
 const columnRoutes = require('./routes/column')
 const taskRoutes = require('./routes/task')
 const userRoutes = require('./routes/user')
+const adminRoutes = require('./routes/admin')
 const path = require('path');
 const cors = require('cors');
 const dotenv = require('dotenv')
@@ -17,6 +18,7 @@ app.use('/images', express.static(path.join(__dirname, 'images')))
 app.use(cors());
 
 app.use('/auth', authRoutes)
+app.use('/admin', adminRoutes)
 app.use('/api/column', columnRoutes)
 app.use('/api/task', taskRoutes)
 app.use('/api/user', userRoutes)
