@@ -180,7 +180,7 @@ router.post('/files/:id', checkAuth, fileUploader.single('background'),  async (
       })
     }
 
-    task.background = req.file.path
+    // task.background = req.file.path
 
     task.save()
     res.status(200).json({
