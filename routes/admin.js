@@ -89,7 +89,7 @@ router.get('/tasks', checkAuth, checkAdmin, async (req, res) => {
 router.get('/users', checkAuth, checkAdmin, async (req, res) => {
   try {
     const fields = req.query?.fields ? req.query.fields.split(',') : []
-    const objectFields = fields.length ? fields.reduce((pv,cv) => ({...pv, [cv]: 1}), {}) : {}
+    const objectFields = fields.length ? fields.reduce((pv,cv) => ({...pv, [cv]: 1}), {}) : {name: 1}
     const users = await User.find({}, objectFields)
 
     res.status(200).json({
