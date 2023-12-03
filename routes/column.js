@@ -138,7 +138,7 @@ router.patch('/:id', checkAuth, async (req, res) => {
   } catch(e) {
     console.log(e)
     res.status(400).json({
-      message: "something went wrong"
+      message: "Something went wrong"
     })
   }
 })
@@ -187,7 +187,7 @@ router.delete('/:id', checkAuth, async (req, res) => {
     })
 
     res.status(200).json({
-      message: `Column "${req.params.id}" deleted successfully`
+      message: `Column "${doc.title}" deleted successfully`
     })
 
   } catch(e) {
