@@ -82,7 +82,7 @@ router.delete('/:id',checkAuth,  async (req, res) => {
     }
 
     res.status(200).json({
-      message: `Task "${req.params.id}" deleted successfully`
+      message: `Task "${deletedTask.title}" deleted successfully`
     })
   } catch (e) {
     console.log(e);
