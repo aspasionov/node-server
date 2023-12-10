@@ -14,6 +14,38 @@ const mappedCards = (cards) => cards.map(card => ({
 
 router.get('/', checkAuth, async (req, res) => {
   try {
+    const cardsPipeline = [
+      {
+        $match: {
+          $expr: { $eq: ['$columnId', '$$columnId'] }
+        },
+      },
+      {
+        $sort: { order: 1 }
+      },
+      {
+        $project: {
+          title: 1,
+          description: 1,
+          label: 1,
+          order: 1,
+          columnId: 1,
+          background: 1
+        },
+      }
+    ]
+    
+    if(req.query.search) {
+      cardsPipeline.push({
+        $match: {
+          $or: [
+            { title: { $regex: req.query.search, $options: "i" } },
+            { description: { $regex: req.query.search, $options: "i" } }
+          ]
+        }
+      })
+    }
+    
     const columns = await Column.aggregate([
       { $match: { userId: new mongoose.Types.ObjectId(req.userId) } },
       {
@@ -23,26 +55,7 @@ router.get('/', checkAuth, async (req, res) => {
         $lookup: {
           from: 'tasks',
           let: { columnId: '$_id' },
-          pipeline: [
-            {
-              $match: {
-                $expr: { $eq: ['$columnId', '$$columnId'] },
-              },
-            },
-            {
-              $sort: { order: 1 }
-            },
-            {
-              $project: {
-                title: 1,
-                description: 1,
-                label: 1,
-                order: 1,
-                columnId: 1,
-                background: 1
-              },
-            }
-          ],
+          pipeline: cardsPipeline,
           as: 'cards',
         },
       },
