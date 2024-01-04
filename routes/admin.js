@@ -11,7 +11,7 @@ const router = Router()
 router.get('/columns', checkAuth, checkAdmin, async (req, res) => {
   try {
   const page = +req.query.page || 1
-  const columnPerPage = +req.query.limit || 6
+  const columnPerPage = +req.query.limit || 1000
   const search = { title: { $regex: req.query?.search || '', $options: 'i' } }
   const skip = (page - 1) * columnPerPage;
   const userIds = req.query.userIds ? req.query?.userIds.split(',').map(id => new ObjectId(id)) : []
@@ -25,43 +25,17 @@ router.get('/columns', checkAuth, checkAdmin, async (req, res) => {
     matchStage = { userId: { $in: userIds } }
   }
   
-    const columns = await Column.aggregate([
-    {
-      $sort: { order: 1 }
-    },
-    {
-      $lookup: {
-        from: 'tasks',
-        let: { columnId: '$_id' },
-        pipeline: [
-          {
-            $match: {
-              $expr: { $eq: ['$columnId', '$$columnId'] },
-            },
-          },
-          {
-            $sort: { order: 1 }
-          },
-          {
-            $project: {
-              title: 1,
-              description: 1,
-              label: 1,
-              order: 1,
-              columnId: 1,
-            },
-          }
-        ],
-        as: 'cards',
-      },
-    },
-    { $skip: skip },
-      ...(Object.keys(matchStage) ? [{$match: matchStage }] : []),
-    { $limit: columnPerPage }
-  ])
+    const totalCount = await Column.countDocuments(matchStage)
+    
+    const columns = await  Column.find(matchStage)
+      .skip(skip)
+      .limit(columnPerPage);
     
     res.status(200).json({
-      data: columns
+      data: columns,
+      meta: {
+        total_count: totalCount
+      }
     })
   } catch(err) {
     console.log(err)
@@ -105,7 +79,6 @@ router.get('/users', checkAuth, checkAdmin, async (req, res) => {
 
 router.get('/statistic', checkAuth, checkAdmin, async (req, res) => {
   try {
-    // const users = await User.find({})
 
     res.status(200).json({
       data: ['lol', 'kek']
